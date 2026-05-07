@@ -161,7 +161,7 @@
             this.btnDicts.TabIndex = 4;
             this.btnDicts.Text = "Справочники";
             this.btnDicts.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.btnDicts.Click += new System.EventHandler(this.btnDicts_Click);
+            this.btnDicts.Click += new System.EventHandler(this.btnOpenDictionaries);
             // 
             // Form1
             // 

@@ -80,7 +80,7 @@ namespace AutoSchedule
                         groups.Add(new GroupList
                         {
                             // Теперь читаем GroupID вместо "Код"
-                            GroupId = SafeGetInt(reader["GroupID"]),
+                            GroupId = SafeGetInt(reader["GroupId"]),
                             GroupName = SafeGetString(reader["GroupName"]),
                             StudentCount = SafeGetInt(reader["StudentCount"]),
                             IsFullTime = SafeGetBool(reader["IsFullTime"]),

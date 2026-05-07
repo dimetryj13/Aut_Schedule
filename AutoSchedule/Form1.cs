@@ -1244,26 +1244,59 @@ namespace AutoSchedule
 
         private void RefreshAllData()
         {
-            // 1. Очищаем старые списки, чтобы данные не дублировались
-            classrooms.Clear();
-            groups.Clear();
-            subjects.Clear();
-            teachers.Clear();
-            academicPlans.Clear();
-            teacherDaysOff.Clear();
-            teacherRoomPrefs.Clear();
-            enrichedPlans.Clear();
-            _roomIndicators.Clear();
+            if (string.IsNullOrEmpty(connectionString)) return;
 
-            // 2. Вызываем твою логику загрузки из БД
-            // Убедись, что вызываешь те же методы, что и при старте программы (в Form1_Load)
-            LoadDatabaseData(selectedPath);
-            // 3. Обновляем визуальные элементы
-            PopulateAssignmentCards(); // Перерисовывает карточки слева
-            LoadAllRoomsToPanel();     // Перерисовывает кнопки аудиторий внизу
-            dgvSchedule.Invalidate();  // Перерисовывает саму шахматку
+            try
+            {
+                // Извлекаем чистый путь к файлу базы данных из строки подключения
+                string dbPath = connectionString.Replace("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=", "").TrimEnd(';');
+                DatabaseManager dbManager = new DatabaseManager(dbPath);
+
+                // 1. Загрузка свежих данных из БД (используем методы из твоего DatabaseManager.cs)
+                classrooms = dbManager.GetClassrooms();
+                groups = dbManager.GetGroups();
+                subjects = dbManager.GetSubjects();
+                teachers = dbManager.GetTeachers();
+                academicPlans = dbManager.GetAcademicPlans();
+                teacherDaysOff = dbManager.GetTeacherDaysOff();
+                schedules = dbManager.GetSchedules();
+                teacherRoomPrefs = dbManager.GetTeacherRoomPrefs();
+
+                // 2. Связывание данных (Mapping)
+                // Согласно DataMappingService.cs, метод называется MapAcademicPlans
+                DataMappingService mappingService = new DataMappingService(groups, subjects, teachers);
+                enrichedPlans = mappingService.MapAcademicPlans(academicPlans);
+
+                // 3. Инициализация пула карточек
+                globalPool = new AssignmentPool();
+                globalPool.Initialize(enrichedPlans);
+
+                // 4. Инициализация валидатора
+                // Порядок аргументов в ValidationService.cs: daysOff, currentSchedule
+                globalValidator = new ValidationService(teacherDaysOff, schedules);
+
+                // 5. Очистка временных состояний и обновление интерфейса
+                _activeCardForPlacement = null;
+                _activeRoomForPlacement = null;
+                _roomIndicators.Clear();
+
+                PopulateAssignmentCards();
+
+                if (_selectedGroup != null)
+                {
+                    LoadAllRoomsToPanel();
+                }
+
+                if (dgvSchedule != null)
+                {
+                    dgvSchedule.Invalidate();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Ошибка при обновлении данных: " + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
-
         private void btnHistory_Click(object sender, EventArgs e)
         {
             new FormHistory().ShowDialog();
@@ -1272,7 +1305,7 @@ namespace AutoSchedule
 
 
 
-        private void btnDicts_Click(object sender, EventArgs e)
+        private void btnOpenDictionaries(object sender, EventArgs e)
         {
             // Создаем форму справочников
             // Передаем твою строку подключения (она у тебя объявлена в полях Form1)

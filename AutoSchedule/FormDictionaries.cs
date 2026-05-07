@@ -11,33 +11,30 @@ namespace AutoSchedule
         private TabControl tabControl;
         private string _connectionString;
 
-        // Адаптеры и таблицы для автоматической синхронизации с БД
-        private OleDbDataAdapter daTeachers, daRooms, daSubjects, daGroups;
-        private DataTable dtTeachers, dtRooms, dtSubjects, dtGroups;
+        // Адаптеры и таблицы для синхронизации
+        private OleDbDataAdapter daClassrooms, daGroups, daSubjects, daTeachers, daAvailability, daDaysOff, daRoomPrefs;
+        private DataTable dtClassrooms, dtGroups, dtSubjects, dtTeachers, dtAvailability, dtDaysOff, dtRoomPrefs;
 
-        // Флаг, сообщающий главной форме, что данные изменились
         public bool DataChanged { get; private set; } = false;
 
         public FormDictionaries(string connectionString)
         {
             _connectionString = connectionString;
-            this.Text = "«Редактор базы данных» (Режим Excel)";
-            this.Size = new Size(850, 500);
+            this.Text = "Редактор справочников БД";
+            this.Size = new Size(950, 550);
             this.StartPosition = FormStartPosition.CenterParent;
 
             tabControl = new TabControl { Dock = DockStyle.Fill, Font = new Font("Segoe UI", 10) };
 
-            // Кнопка сохранения внизу
             Button btnSave = new Button
             {
-                Text = "💾 Сохранить все изменения в базу данных",
+                Text = "💾 Сохранить изменения во всех таблицах",
                 Dock = DockStyle.Bottom,
                 Height = 45,
                 BackColor = Color.FromArgb(0, 122, 204),
                 ForeColor = Color.White,
-                Font = new Font("Segoe UI", 10, FontStyle.Bold),
-                FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand
+                Font = new Font("Segoe UI", 11, FontStyle.Bold),
+                FlatStyle = FlatStyle.Flat
             };
             btnSave.Click += BtnSave_Click;
 
@@ -53,42 +50,58 @@ namespace AutoSchedule
             {
                 using (OleDbConnection conn = new OleDbConnection(_connectionString))
                 {
-                    // 1. ПРЕПОДАВАТЕЛИ
-                    daTeachers = new OleDbDataAdapter("SELECT * FROM [Teachers]", conn);
-                    new OleDbCommandBuilder(daTeachers); // Магия: сам пишет INSERT/UPDATE
-                    dtTeachers = new DataTable();
-                    daTeachers.Fill(dtTeachers);
-                    tabControl.TabPages.Add(CreateTab("Преподаватели", dtTeachers, "TeacherID"));
+                    // Имена таблиц и ID взяты из DatabaseManager.cs
 
-                    // 2. АУДИТОРИИ (Проверь: Classrooms или Rooms)
-                    daRooms = new OleDbDataAdapter("SELECT * FROM [Classrooms]", conn);
-                    new OleDbCommandBuilder(daRooms);
-                    dtRooms = new DataTable();
-                    daRooms.Fill(dtRooms);
-                    tabControl.TabPages.Add(CreateTab("Аудитории", dtRooms, "RoomID"));
+                    daClassrooms = new OleDbDataAdapter("SELECT * FROM Classroom", conn);
+                    new OleDbCommandBuilder(daClassrooms);
+                    dtClassrooms = new DataTable();
+                    daClassrooms.Fill(dtClassrooms);
+                    tabControl.TabPages.Add(CreateTab("Аудитории", dtClassrooms, "RoomID"));
 
-                    // 3. ДИСЦИПЛИНЫ
-                    daSubjects = new OleDbDataAdapter("SELECT * FROM [Subjects]", conn);
+                    daGroups = new OleDbDataAdapter("SELECT * FROM GroupsList", conn);
+                    new OleDbCommandBuilder(daGroups);
+                    dtGroups = new DataTable();
+                    daGroups.Fill(dtGroups);
+                    tabControl.TabPages.Add(CreateTab("Группы", dtGroups, "GroupID"));
+
+                    daSubjects = new OleDbDataAdapter("SELECT * FROM Subjects", conn);
                     new OleDbCommandBuilder(daSubjects);
                     dtSubjects = new DataTable();
                     daSubjects.Fill(dtSubjects);
                     tabControl.TabPages.Add(CreateTab("Дисциплины", dtSubjects, "SubjectID"));
 
-                    // 4. ГРУППЫ (Проверь: Groups или GroupList)
-                    daGroups = new OleDbDataAdapter("SELECT * FROM [Groups]", conn);
-                    new OleDbCommandBuilder(daGroups);
-                    dtGroups = new DataTable();
-                    daGroups.Fill(dtGroups);
-                    tabControl.TabPages.Add(CreateTab("Группы", dtGroups, "GroupId"));
+                    daTeachers = new OleDbDataAdapter("SELECT * FROM Teachers", conn);
+                    new OleDbCommandBuilder(daTeachers);
+                    dtTeachers = new DataTable();
+                    daTeachers.Fill(dtTeachers);
+                    tabControl.TabPages.Add(CreateTab("Преподаватели", dtTeachers, "TeacherID"));
+
+                    daAvailability = new OleDbDataAdapter("SELECT * FROM TeacherAvailability", conn);
+                    new OleDbCommandBuilder(daAvailability);
+                    dtAvailability = new DataTable();
+                    daAvailability.Fill(dtAvailability);
+                    tabControl.TabPages.Add(CreateTab("Доступность", dtAvailability, "TeacherAvailabilityId"));
+
+                    daDaysOff = new OleDbDataAdapter("SELECT * FROM TeacherDaysOff", conn);
+                    new OleDbCommandBuilder(daDaysOff);
+                    dtDaysOff = new DataTable();
+                    daDaysOff.Fill(dtDaysOff);
+                    tabControl.TabPages.Add(CreateTab("Выходные", dtDaysOff, "TeacherDayOffId"));
+
+                    daRoomPrefs = new OleDbDataAdapter("SELECT * FROM TeacherRoomPrefs", conn);
+                    new OleDbCommandBuilder(daRoomPrefs);
+                    dtRoomPrefs = new DataTable();
+                    daRoomPrefs.Fill(dtRoomPrefs);
+                    tabControl.TabPages.Add(CreateTab("Приоритеты аудиторий", dtRoomPrefs, "TeacherRoomPrefId"));
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка при подключении к таблицам БД. Проверьте названия таблиц!\n" + ex.Message, "Ошибка БД", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Ошибка загрузки данных: " + ex.Message);
             }
         }
 
-        private TabPage CreateTab(string title, DataTable dt, string idColumnName)
+        private TabPage CreateTab(string title, DataTable dt, string primaryKeyColumn)
         {
             TabPage tab = new TabPage(title);
             DataGridView dgv = new DataGridView
@@ -98,13 +111,15 @@ namespace AutoSchedule
                 AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
                 BackgroundColor = Color.White,
                 BorderStyle = BorderStyle.None,
-                AllowUserToAddRows = true,  // Разрешаем добавлять
-                AllowUserToDeleteRows = true // Разрешаем удалять
+                AllowUserToAddRows = true
             };
 
-            // Прячем колонку с ID, так как счетчик (AutoNumber) база ставит сама
-            if (dgv.Columns[idColumnName] != null)
-                dgv.Columns[idColumnName].Visible = false;
+            // Скрываем колонку ID, так как она заполняется автоматически
+            dgv.DataBindingComplete += (s, e) =>
+            {
+                if (dgv.Columns.Contains(primaryKeyColumn))
+                    dgv.Columns[primaryKeyColumn].Visible = false;
+            };
 
             tab.Controls.Add(dgv);
             return tab;
@@ -114,21 +129,21 @@ namespace AutoSchedule
         {
             try
             {
-                // Принудительно завершаем редактирование ячейки, если курсор еще в ней
                 this.Validate();
-
-                // Отправляем все списки разом в Access
-                daTeachers.Update(dtTeachers);
-                daRooms.Update(dtRooms);
-                daSubjects.Update(dtSubjects);
+                daClassrooms.Update(dtClassrooms);
                 daGroups.Update(dtGroups);
+                daSubjects.Update(dtSubjects);
+                daTeachers.Update(dtTeachers);
+                daAvailability.Update(dtAvailability);
+                daDaysOff.Update(dtDaysOff);
+                daRoomPrefs.Update(dtRoomPrefs);
 
                 DataChanged = true;
-                MessageBox.Show("Изменения успешно сохранены!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Все изменения успешно сохранены!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Ошибка сохранения. Убедитесь, что обязательные поля заполнены и нет дубликатов.\n\n" + ex.Message, "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Ошибка при сохранении: " + ex.Message);
             }
         }
     }
