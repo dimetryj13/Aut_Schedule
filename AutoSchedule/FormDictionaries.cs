@@ -11,12 +11,12 @@ namespace AutoSchedule
         private TabControl tabControl;
         private string _connectionString;
 
-        // Адаптеры и таблицы для синхронизации
         private OleDbDataAdapter daClassrooms, daGroups, daSubjects, daTeachers, daAvailability, daDaysOff, daRoomPrefs;
         private DataTable dtClassrooms, dtGroups, dtSubjects, dtTeachers, dtAvailability, dtDaysOff, dtRoomPrefs;
 
         public bool DataChanged { get; private set; } = false;
 
+        // ИСПРАВЛЕНО: Добавлен конструктор с параметром
         public FormDictionaries(string connectionString)
         {
             _connectionString = connectionString;
@@ -41,6 +41,7 @@ namespace AutoSchedule
             this.Controls.Add(tabControl);
             this.Controls.Add(btnSave);
 
+            // ИСПРАВЛЕНО: Загрузка вызывается только после инициализации _connectionString
             LoadDataFromDatabase();
         }
 
@@ -50,8 +51,7 @@ namespace AutoSchedule
             {
                 using (OleDbConnection conn = new OleDbConnection(_connectionString))
                 {
-                    // Имена таблиц и ID взяты из DatabaseManager.cs
-
+                    // Используем точные названия таблиц и ID из твоего видео и DatabaseManager.cs
                     daClassrooms = new OleDbDataAdapter("SELECT * FROM Classroom", conn);
                     new OleDbCommandBuilder(daClassrooms);
                     dtClassrooms = new DataTable();
@@ -62,7 +62,7 @@ namespace AutoSchedule
                     new OleDbCommandBuilder(daGroups);
                     dtGroups = new DataTable();
                     daGroups.Fill(dtGroups);
-                    tabControl.TabPages.Add(CreateTab("Группы", dtGroups, "GroupID"));
+                    tabControl.TabPages.Add(CreateTab("Группы", dtGroups, "GroupId"));
 
                     daSubjects = new OleDbDataAdapter("SELECT * FROM Subjects", conn);
                     new OleDbCommandBuilder(daSubjects);
@@ -114,7 +114,6 @@ namespace AutoSchedule
                 AllowUserToAddRows = true
             };
 
-            // Скрываем колонку ID, так как она заполняется автоматически
             dgv.DataBindingComplete += (s, e) =>
             {
                 if (dgv.Columns.Contains(primaryKeyColumn))
