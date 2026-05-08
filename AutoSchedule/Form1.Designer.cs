@@ -33,11 +33,12 @@
             this.pnlScheduleContainer = new System.Windows.Forms.Panel();
             this.flpRoomIndicators = new System.Windows.Forms.FlowLayoutPanel();
             this.pnlToolbar = new System.Windows.Forms.Panel();
+            this.btnOpenRooms = new System.Windows.Forms.Button();
+            this.btnDicts = new System.Windows.Forms.Button();
             this.btnHistory = new System.Windows.Forms.Button();
             this.lblSemesterSelect = new System.Windows.Forms.Label();
             this.lblGroupSelect = new System.Windows.Forms.Label();
             this.btnOpenDb = new System.Windows.Forms.Button();
-            this.btnDicts = new System.Windows.Forms.Button();
             this.tlpMainLayout.SuspendLayout();
             this.pnlToolbar.SuspendLayout();
             this.SuspendLayout();
@@ -100,6 +101,7 @@
             // pnlToolbar
             // 
             this.pnlToolbar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlToolbar.Controls.Add(this.btnOpenRooms);
             this.pnlToolbar.Controls.Add(this.btnDicts);
             this.pnlToolbar.Controls.Add(this.btnHistory);
             this.pnlToolbar.Controls.Add(this.lblSemesterSelect);
@@ -110,6 +112,26 @@
             this.pnlToolbar.Name = "pnlToolbar";
             this.pnlToolbar.Size = new System.Drawing.Size(642, 52);
             this.pnlToolbar.TabIndex = 3;
+            // 
+            // btnOpenRooms
+            // 
+            this.btnOpenRooms.Location = new System.Drawing.Point(284, 28);
+            this.btnOpenRooms.Name = "btnOpenRooms";
+            this.btnOpenRooms.Size = new System.Drawing.Size(92, 23);
+            this.btnOpenRooms.TabIndex = 5;
+            this.btnOpenRooms.Text = "Аудитории";
+            this.btnOpenRooms.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.btnOpenRooms.Click += new System.EventHandler(this.btnOpenRooms_Click);
+            // 
+            // btnDicts
+            // 
+            this.btnDicts.Location = new System.Drawing.Point(271, 2);
+            this.btnDicts.Name = "btnDicts";
+            this.btnDicts.Size = new System.Drawing.Size(105, 23);
+            this.btnDicts.TabIndex = 4;
+            this.btnDicts.Text = "Справочники";
+            this.btnDicts.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.btnDicts.Click += new System.EventHandler(this.btnOpenDictionaries);
             // 
             // btnHistory
             // 
@@ -153,16 +175,6 @@
             this.btnOpenDb.UseVisualStyleBackColor = true;
             this.btnOpenDb.Click += new System.EventHandler(this.btnOpenDb_Click);
             // 
-            // btnDicts
-            // 
-            this.btnDicts.Location = new System.Drawing.Point(271, 2);
-            this.btnDicts.Name = "btnDicts";
-            this.btnDicts.Size = new System.Drawing.Size(105, 23);
-            this.btnDicts.TabIndex = 4;
-            this.btnDicts.Text = "Справочники";
-            this.btnDicts.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.btnDicts.Click += new System.EventHandler(this.btnOpenDictionaries);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -193,6 +205,7 @@
         private System.Windows.Forms.Label lblSemesterSelect;
         private System.Windows.Forms.Button btnHistory;
         private System.Windows.Forms.Button btnDicts;
+        private System.Windows.Forms.Button btnOpenRooms;
     }
 }
 

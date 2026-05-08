@@ -1326,5 +1326,10 @@ namespace AutoSchedule
             }
         }
 
+        private void btnOpenRooms_Click(object sender, EventArgs e)
+        {
+            FormRoomEditor form = new FormRoomEditor(connectionString); // передаем строку подключения
+            form.ShowDialog();
+        }
     }
 }
