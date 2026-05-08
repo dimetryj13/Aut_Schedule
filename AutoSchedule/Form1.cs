@@ -1331,5 +1331,11 @@ namespace AutoSchedule
             FormRoomEditor form = new FormRoomEditor(connectionString); // передаем строку подключения
             form.ShowDialog();
         }
+
+        private void btnOpenTeachers_Click(object sender, EventArgs e)
+        {
+            FormTeacherEditor form = new FormTeacherEditor(connectionString);
+            form.ShowDialog();
+        }
     }
 }

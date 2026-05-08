@@ -254,6 +254,19 @@ namespace AutoSchedule
             }
         }
 
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // FormRoomEditor
+            // 
+            this.ClientSize = new System.Drawing.Size(282, 253);
+            this.Name = "FormRoomEditor";
+            this.Text = "Ta";
+            this.ResumeLayout(false);
+
+        }
+
         private void BtnDelete_Click(object sender, EventArgs e)
         {
             if (_selectedRoom == null) return;

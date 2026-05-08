@@ -39,6 +39,7 @@
             this.lblSemesterSelect = new System.Windows.Forms.Label();
             this.lblGroupSelect = new System.Windows.Forms.Label();
             this.btnOpenDb = new System.Windows.Forms.Button();
+            this.btnOpenTeachers = new System.Windows.Forms.Button();
             this.tlpMainLayout.SuspendLayout();
             this.pnlToolbar.SuspendLayout();
             this.SuspendLayout();
@@ -101,6 +102,7 @@
             // pnlToolbar
             // 
             this.pnlToolbar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlToolbar.Controls.Add(this.btnOpenTeachers);
             this.pnlToolbar.Controls.Add(this.btnOpenRooms);
             this.pnlToolbar.Controls.Add(this.btnDicts);
             this.pnlToolbar.Controls.Add(this.btnHistory);
@@ -175,6 +177,16 @@
             this.btnOpenDb.UseVisualStyleBackColor = true;
             this.btnOpenDb.Click += new System.EventHandler(this.btnOpenDb_Click);
             // 
+            // btnOpenTeachers
+            // 
+            this.btnOpenTeachers.Location = new System.Drawing.Point(397, 2);
+            this.btnOpenTeachers.Name = "btnOpenTeachers";
+            this.btnOpenTeachers.Size = new System.Drawing.Size(92, 23);
+            this.btnOpenTeachers.TabIndex = 6;
+            this.btnOpenTeachers.Text = "Преподаватели";
+            this.btnOpenTeachers.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.btnOpenTeachers.Click += new System.EventHandler(this.btnOpenTeachers_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
@@ -206,6 +218,7 @@
         private System.Windows.Forms.Button btnHistory;
         private System.Windows.Forms.Button btnDicts;
         private System.Windows.Forms.Button btnOpenRooms;
+        private System.Windows.Forms.Button btnOpenTeachers;
     }
 }
 
