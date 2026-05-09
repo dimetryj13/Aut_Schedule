@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.OleDb;
 using System.Drawing;
 using System.Windows.Forms;
@@ -47,28 +48,30 @@ namespace AutoSchedule
             LoadTeachersList();
         }
 
+        // --- МЕТОДЫ-ПРЕДОХРАНИТЕЛИ ОТ ПУСТЫХ ЯЧЕЕК (DBNull) ---
+        private string SafeGetString(object val) => val != DBNull.Value && val != null ? val.ToString().Trim() : "";
+        private int SafeGetInt(object val, int defaultVal = 0) => val != DBNull.Value && val != null ? Convert.ToInt32(val) : defaultVal;
+        private bool SafeGetBool(object val) => val != DBNull.Value && val != null ? Convert.ToBoolean(val) : false;
+
         private void SetupUI()
         {
-            // ГЛАВНЫЙ СЛОЙ
             TableLayoutPanel tlpMain = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
             tlpMain.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250F));
             tlpMain.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             this.Controls.Add(tlpMain);
 
-            // Список преподавателей
             lstTeachers = new ListBox { Dock = DockStyle.Fill, Font = new Font("Segoe UI", 11), DisplayMember = "Name", ValueMember = "ID", Margin = new Padding(5) };
             lstTeachers.SelectedIndexChanged += LstTeachers_SelectedIndexChanged;
             tlpMain.Controls.Add(lstTeachers, 0, 0);
 
-            // ПРАВАЯ ПАНЕЛЬ РЕДАКТОРА
             TableLayoutPanel tlpEditor = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 4, ColumnCount = 1 };
-            tlpEditor.RowStyles.Add(new RowStyle(SizeType.Absolute, 100F)); // Личные данные
-            tlpEditor.RowStyles.Add(new RowStyle(SizeType.Absolute, 230F)); // Матрица доступности
-            tlpEditor.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));  // Аудитории
-            tlpEditor.RowStyles.Add(new RowStyle(SizeType.Absolute, 60F));  // Кнопки сохранения
+            tlpEditor.RowStyles.Add(new RowStyle(SizeType.Absolute, 100F));
+            tlpEditor.RowStyles.Add(new RowStyle(SizeType.Absolute, 230F));
+            tlpEditor.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tlpEditor.RowStyles.Add(new RowStyle(SizeType.Absolute, 60F));
             tlpMain.Controls.Add(tlpEditor, 1, 0);
 
-            // --- БЛОК 1: ОСНОВНЫЕ ДАННЫЕ ---
+            // БЛОК 1: ОСНОВНЫЕ ДАННЫЕ
             GroupBox gbBasic = new GroupBox { Text = "👤 Личные данные", Dock = DockStyle.Fill, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
             TableLayoutPanel tlpBasic = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 4, RowCount = 2 };
 
@@ -91,7 +94,7 @@ namespace AutoSchedule
             gbBasic.Controls.Add(tlpBasic);
             tlpEditor.Controls.Add(gbBasic, 0, 0);
 
-            // --- БЛОК 2: МАТРИЦА ДОСТУПНОСТИ ---
+            // БЛОК 2: МАТРИЦА ДОСТУПНОСТИ
             GroupBox gbMatrix = new GroupBox { Text = "📅 Матрица доступности (Дни и Пары)", Dock = DockStyle.Fill, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
             TableLayoutPanel tlpMatrix = new TableLayoutPanel { Dock = DockStyle.Fill, RowCount = 7, ColumnCount = 7, CellBorderStyle = TableLayoutPanelCellBorderStyle.Single };
 
@@ -116,11 +119,11 @@ namespace AutoSchedule
             gbMatrix.Controls.Add(tlpMatrix);
             tlpEditor.Controls.Add(gbMatrix, 0, 1);
 
-            // --- БЛОК 3: ДВЕ РАЗДЕЛЬНЫЕ ПАНЕЛИ ДЛЯ АУДИТОРИЙ И ПРИОРИТЕТОВ ---
+            // БЛОК 3: ПАНЕЛИ АУДИТОРИЙ И ПРИОРИТЕТОВ
             GroupBox gbPrefs = new GroupBox { Text = "🏫 Предпочтения аудиторий", Dock = DockStyle.Fill, Font = new Font("Segoe UI", 10, FontStyle.Bold) };
             TableLayoutPanel tlpRooms = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 2, RowCount = 1 };
-            tlpRooms.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65F)); // Левая для аудиторий
-            tlpRooms.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35F)); // Правая для пульта приоритетов
+            tlpRooms.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 65F));
+            tlpRooms.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35F));
 
             flpRooms = new FlowLayoutPanel { Dock = DockStyle.Fill, AutoScroll = true, Padding = new Padding(5) };
             tlpRooms.Controls.Add(flpRooms, 0, 0);
@@ -143,7 +146,7 @@ namespace AutoSchedule
             gbPrefs.Controls.Add(tlpRooms);
             tlpEditor.Controls.Add(gbPrefs, 0, 2);
 
-            // --- БЛОК 4: КНОПКИ ---
+            // БЛОК 4: КНОПКИ
             FlowLayoutPanel flpButtons = new FlowLayoutPanel { Dock = DockStyle.Fill, FlowDirection = FlowDirection.LeftToRight };
             btnSave = new Button { Text = "💾 Сохранить", Width = 180, Height = 45, BackColor = Color.FromArgb(0, 122, 204), ForeColor = Color.White, Font = new Font("Segoe UI", 10, FontStyle.Bold), FlatStyle = FlatStyle.Flat, Cursor = Cursors.Hand };
             btnSave.Click += BtnSave_Click;
@@ -160,7 +163,6 @@ namespace AutoSchedule
             tlpEditor.Controls.Add(flpButtons, 0, 3);
         }
 
-        // --- БЕЗОПАСНАЯ ЗАГРУЗКА БАЗЫ ---
         private void LoadRoomsDict()
         {
             try
@@ -171,7 +173,11 @@ namespace AutoSchedule
                     using (var cmd = new OleDbCommand("SELECT RoomNumber FROM Classroom ORDER BY RoomNumber", conn))
                     using (var r = cmd.ExecuteReader())
                     {
-                        while (r.Read()) _allRooms.Add(r["RoomNumber"].ToString());
+                        while (r.Read())
+                        {
+                            string rn = SafeGetString(r["RoomNumber"]);
+                            if (!string.IsNullOrEmpty(rn)) _allRooms.Add(rn);
+                        }
                     }
                 }
             }
@@ -202,7 +208,6 @@ namespace AutoSchedule
                 {
                     _selectedRoomNum = roomNum;
 
-                    // Выделяем выбранную кнопку рамкой
                     foreach (var b in _roomButtons.Values) { b.FlatAppearance.BorderSize = 1; b.FlatAppearance.BorderColor = Color.Gray; }
                     btnRoom.FlatAppearance.BorderSize = 3;
                     btnRoom.FlatAppearance.BorderColor = Color.Blue;
@@ -256,8 +261,16 @@ namespace AutoSchedule
                     {
                         while (r.Read())
                         {
-                            lstTeachers.Items.Add(new { ID = Convert.ToInt32(r["TeacherID"]), Name = r["FullName"].ToString() });
-                            if (r["Department"] != DBNull.Value) departments.Add(r["Department"].ToString());
+                            int id = Convert.ToInt32(r["TeacherID"]);
+                            string fullName = SafeGetString(r["FullName"]);
+
+                            // Защита от пустых имен в списке
+                            if (string.IsNullOrWhiteSpace(fullName)) fullName = $"[Без имени] ID: {id}";
+
+                            lstTeachers.Items.Add(new { ID = id, Name = fullName });
+
+                            string dept = SafeGetString(r["Department"]);
+                            if (!string.IsNullOrWhiteSpace(dept)) departments.Add(dept);
                         }
                     }
                 }
@@ -285,7 +298,7 @@ namespace AutoSchedule
                 {
                     conn.Open();
 
-                    // 1. Личные данные
+                    // 1. Личные данные (БЕЗОПАСНОЕ ЧТЕНИЕ)
                     using (var cmd = new OleDbCommand("SELECT * FROM Teachers WHERE TeacherID = ?", conn))
                     {
                         cmd.Parameters.AddWithValue("?", _currentTeacherId);
@@ -293,15 +306,15 @@ namespace AutoSchedule
                         {
                             if (r.Read())
                             {
-                                txtFullName.Text = r["FullName"].ToString();
-                                cmbDepartment.Text = r["Department"].ToString();
-                                numLectureGroups.Value = Convert.ToInt32(r["MaxLectureGroups"]);
-                                numPracticeGroups.Value = Convert.ToInt32(r["MaxPracticeGroups"]);
+                                txtFullName.Text = SafeGetString(r["FullName"]);
+                                cmbDepartment.Text = SafeGetString(r["Department"]);
+                                numLectureGroups.Value = SafeGetInt(r["MaxLectureGroups"], 1); // 1 по умолчанию
+                                numPracticeGroups.Value = SafeGetInt(r["MaxPracticeGroups"], 1);
                             }
                         }
                     }
 
-                    // 2. Матрица доступности (Безопасное чтение строковых индексов!)
+                    // 2. Матрица доступности
                     for (int d = 0; d < 6; d++) for (int p = 0; p < 6; p++) chkAvailability[d, p].Checked = false;
 
                     using (var cmd = new OleDbCommand("SELECT DayIdx, PairIdx, IsAvailable FROM TeacherAvailability WHERE TeacherID = ?", conn))
@@ -311,8 +324,8 @@ namespace AutoSchedule
                         {
                             while (r.Read())
                             {
-                                string dStr = r["DayIdx"].ToString();
-                                string pStr = r["PairIdx"].ToString();
+                                string dStr = SafeGetString(r["DayIdx"]);
+                                string pStr = SafeGetString(r["PairIdx"]);
 
                                 int dIdx = -1;
                                 if (int.TryParse(dStr, out int dParsed)) dIdx = dParsed - 1;
@@ -328,13 +341,13 @@ namespace AutoSchedule
 
                                 if (dIdx >= 0 && dIdx < 6 && pIdx >= 0 && pIdx < 6)
                                 {
-                                    chkAvailability[dIdx, pIdx].Checked = Convert.ToBoolean(r["IsAvailable"]);
+                                    chkAvailability[dIdx, pIdx].Checked = SafeGetBool(r["IsAvailable"]);
                                 }
                             }
                         }
                     }
 
-                    // 3. Приоритеты (Безопасное чтение строкового RoomNumber!)
+                    // 3. Приоритеты аудиторий
                     _teacherRoomPriorities.Clear();
                     using (var cmd = new OleDbCommand("SELECT RoomNumber, Priority FROM TeacherRoomPrefs WHERE TeacherID = ?", conn))
                     {
@@ -343,7 +356,11 @@ namespace AutoSchedule
                         {
                             while (r.Read())
                             {
-                                _teacherRoomPriorities[r["RoomNumber"].ToString()] = Convert.ToInt32(r["Priority"]);
+                                string rNum = SafeGetString(r["RoomNumber"]);
+                                if (!string.IsNullOrEmpty(rNum))
+                                {
+                                    _teacherRoomPriorities[rNum] = SafeGetInt(r["Priority"], 0);
+                                }
                             }
                         }
                     }
@@ -351,7 +368,7 @@ namespace AutoSchedule
                     GenerateRoomButtons();
                 }
             }
-            catch (Exception ex) { MessageBox.Show("Ошибка: " + ex.Message); }
+            catch (Exception ex) { MessageBox.Show("Ошибка чтения данных: " + ex.Message); }
         }
 
         private void BtnAdd_Click(object sender, EventArgs e)
@@ -434,8 +451,8 @@ namespace AutoSchedule
                             {
                                 cmdIns.Parameters.Clear();
                                 cmdIns.Parameters.AddWithValue("?", _currentTeacherId);
-                                cmdIns.Parameters.AddWithValue("?", kvp.Key); // Текстовый номер
-                                cmdIns.Parameters.AddWithValue("?", kvp.Value); // Числовой приоритет
+                                cmdIns.Parameters.AddWithValue("?", kvp.Key);
+                                cmdIns.Parameters.AddWithValue("?", kvp.Value);
                                 cmdIns.ExecuteNonQuery();
                             }
                         }

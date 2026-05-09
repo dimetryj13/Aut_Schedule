@@ -33,13 +33,15 @@
             this.pnlScheduleContainer = new System.Windows.Forms.Panel();
             this.flpRoomIndicators = new System.Windows.Forms.FlowLayoutPanel();
             this.pnlToolbar = new System.Windows.Forms.Panel();
+            this.btnOpenTeachers = new System.Windows.Forms.Button();
             this.btnOpenRooms = new System.Windows.Forms.Button();
             this.btnDicts = new System.Windows.Forms.Button();
             this.btnHistory = new System.Windows.Forms.Button();
             this.lblSemesterSelect = new System.Windows.Forms.Label();
             this.lblGroupSelect = new System.Windows.Forms.Label();
             this.btnOpenDb = new System.Windows.Forms.Button();
-            this.btnOpenTeachers = new System.Windows.Forms.Button();
+            this.btnOpenSubjects = new System.Windows.Forms.Button();
+            this.btnOpenGroups = new System.Windows.Forms.Button();
             this.tlpMainLayout.SuspendLayout();
             this.pnlToolbar.SuspendLayout();
             this.SuspendLayout();
@@ -102,6 +104,8 @@
             // pnlToolbar
             // 
             this.pnlToolbar.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pnlToolbar.Controls.Add(this.btnOpenGroups);
+            this.pnlToolbar.Controls.Add(this.btnOpenSubjects);
             this.pnlToolbar.Controls.Add(this.btnOpenTeachers);
             this.pnlToolbar.Controls.Add(this.btnOpenRooms);
             this.pnlToolbar.Controls.Add(this.btnDicts);
@@ -114,6 +118,16 @@
             this.pnlToolbar.Name = "pnlToolbar";
             this.pnlToolbar.Size = new System.Drawing.Size(642, 52);
             this.pnlToolbar.TabIndex = 3;
+            // 
+            // btnOpenTeachers
+            // 
+            this.btnOpenTeachers.Location = new System.Drawing.Point(397, 2);
+            this.btnOpenTeachers.Name = "btnOpenTeachers";
+            this.btnOpenTeachers.Size = new System.Drawing.Size(92, 23);
+            this.btnOpenTeachers.TabIndex = 6;
+            this.btnOpenTeachers.Text = "Преподаватели";
+            this.btnOpenTeachers.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
+            this.btnOpenTeachers.Click += new System.EventHandler(this.btnOpenTeachers_Click);
             // 
             // btnOpenRooms
             // 
@@ -177,15 +191,25 @@
             this.btnOpenDb.UseVisualStyleBackColor = true;
             this.btnOpenDb.Click += new System.EventHandler(this.btnOpenDb_Click);
             // 
-            // btnOpenTeachers
+            // btnOpenSubjects
             // 
-            this.btnOpenTeachers.Location = new System.Drawing.Point(397, 2);
-            this.btnOpenTeachers.Name = "btnOpenTeachers";
-            this.btnOpenTeachers.Size = new System.Drawing.Size(92, 23);
-            this.btnOpenTeachers.TabIndex = 6;
-            this.btnOpenTeachers.Text = "Преподаватели";
-            this.btnOpenTeachers.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageAboveText;
-            this.btnOpenTeachers.Click += new System.EventHandler(this.btnOpenTeachers_Click);
+            this.btnOpenSubjects.Location = new System.Drawing.Point(397, 31);
+            this.btnOpenSubjects.Name = "btnOpenSubjects";
+            this.btnOpenSubjects.Size = new System.Drawing.Size(92, 23);
+            this.btnOpenSubjects.TabIndex = 7;
+            this.btnOpenSubjects.Text = "Дисциплины";
+            this.btnOpenSubjects.UseVisualStyleBackColor = true;
+            this.btnOpenSubjects.Click += new System.EventHandler(this.btnOpenSubjects_Click);
+            // 
+            // btnOpenGroups
+            // 
+            this.btnOpenGroups.Location = new System.Drawing.Point(522, 16);
+            this.btnOpenGroups.Name = "btnOpenGroups";
+            this.btnOpenGroups.Size = new System.Drawing.Size(75, 23);
+            this.btnOpenGroups.TabIndex = 8;
+            this.btnOpenGroups.Text = "Группы";
+            this.btnOpenGroups.UseVisualStyleBackColor = true;
+            this.btnOpenGroups.Click += new System.EventHandler(this.btnOpenGroups_Click);
             // 
             // Form1
             // 
@@ -219,6 +243,8 @@
         private System.Windows.Forms.Button btnDicts;
         private System.Windows.Forms.Button btnOpenRooms;
         private System.Windows.Forms.Button btnOpenTeachers;
+        private System.Windows.Forms.Button btnOpenSubjects;
+        private System.Windows.Forms.Button btnOpenGroups;
     }
 }
 

@@ -59,7 +59,13 @@
       <DependentUpon>ScheduleCardControl.cs</DependentUpon>
     </Compile>
     <Compile Include="DatabaseManager.cs" />
+    <Compile Include="Editor_Forms\FormGroupEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Editor_Forms\FormRoomEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Editor_Forms\FormSubjectEditor.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Editor_Forms\FormTeacherEditor.cs">

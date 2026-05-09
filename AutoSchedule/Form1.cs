@@ -1337,5 +1337,17 @@ namespace AutoSchedule
             FormTeacherEditor form = new FormTeacherEditor(connectionString);
             form.ShowDialog();
         }
+
+        private void btnOpenSubjects_Click(object sender, EventArgs e)
+        {
+            FormSubjectEditor form = new FormSubjectEditor(connectionString);
+            form.ShowDialog();
+        }
+
+        private void btnOpenGroups_Click(object sender, EventArgs e)
+        {
+            FormGroupEditor form = new FormGroupEditor(connectionString);
+            form.ShowDialog();
+        }
     }
 }
